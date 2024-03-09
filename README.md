@@ -1,1 +1,1 @@
-# A example of a Book Store using FastAPI
+# Example of a Book Store using FastAPI
