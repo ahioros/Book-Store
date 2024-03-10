@@ -25,7 +25,7 @@ def create_connection():
     return connection
 
 
-def fill_table():
+def fill_table() -> None:
     connection = create_connection()
     cursor = connection.cursor()
     cursor.execute(
@@ -46,7 +46,7 @@ def creation_book(book: BookCreate):
     connection.close()
 
 
-def read_book():
+def read_books() -> list[Book]:
     connection = create_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM books")
@@ -59,6 +59,27 @@ def read_book():
 
     return booklist
 
+def __update_book(book: Book) -> bool:
+    connection = create_connection()
+    cursor = connection.cursor()
+    
+    cursor.execute(
+        "UPDATE books SET title =?, author =?, topic =? WHERE id =?",
+        (book.title, book.author, book.topic, book.id),
+    )
+    connection.commit()    
+    return True
+
+def __delete_book(book_id: str) -> bool:
+    connection = create_connection()
+    cursor = connection.cursor()
+    
+    cursor.execute(
+        "DELETE FROM books WHERE id =?",
+        (book_id,),
+    )
+    connection.commit()
+    return True
 
 @app.get("/")
 def read_root():
@@ -80,4 +101,14 @@ def create_table(create: CreateTable):
 
 @app.get("/books/")
 def get_books():
-    return read_book()
+    return read_books()
+
+@app.put("/update-book/")
+def update_book(book: Book):
+    if __update_book(book):
+        return {"message": "Book updated"}
+
+@app.delete("/delete-book/{book_id}")
+def delete_book(book_id: int):
+    if __delete_book(book_id):
+        return {"message": "Book deleted"}
